@@ -1,12 +1,12 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include <direction.hpp>
+#include "direction.hpp"
 #include <forward_list>
 #include "highest_resolution_steady_clock.hpp"
 #include "keyboard.hpp"
 #include <list>
-#include <point.hpp>
+#include "point.hpp"
 #include <queue>
 #include <SDL.h>
 
