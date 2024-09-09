@@ -56,6 +56,7 @@ void Game::poll() {
 void Game::step() {
     std::vector<SDL_Keycode> _movementKeys{SDLK_w, SDLK_a, SDLK_s, SDLK_d};
     SDL_Point _prevPos, _currPos;
+    int _status;
     switch (state) {
         case State::newGame:
             for (const auto _key : _movementKeys) {
@@ -74,11 +75,9 @@ void Game::step() {
                 break;
             }
             _currPos = player.get_next_position();
-            if (_currPos.x != _prevPos.x || _currPos.y != _prevPos.y) {
-                int _status = grid.update(_prevPos, _currPos);
-                if (_status < 0) {
-                    state = State::gameOver;
-                }
+            _status = grid.update(_prevPos, _currPos);
+            if (_status < 0) {
+                state = State::gameOver;
             }
             break;
             

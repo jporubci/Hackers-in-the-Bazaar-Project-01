@@ -18,7 +18,7 @@ Grid::Grid(
     numCols(_numCols),
     tileSize(_tileSize),
     gridSize(calc_grid_size()), sceneSize(calc_scene_size()), sceneOffset(calc_scene_offset()), gridOffset(calc_grid_offset()),
-    grid(numRows, std::vector<int>(numCols)),
+    grid(numRows, std::vector<Tile>(numCols, Tile::empty)),
     wallRects(calc_wall_rects()),
     fruitPos(init_fruit({11, 5}))
 {}
@@ -75,7 +75,7 @@ std::vector<SDL_Rect> Grid::calc_wall_rects() const {
 }
 
 SDL_Point Grid::init_fruit(SDL_Point _fruitPos) {
-    grid.at(_fruitPos.y).at(_fruitPos.x) = -1;
+    grid.at(_fruitPos.y).at(_fruitPos.x) = Tile::fruit;
     return _fruitPos;
 }
 
@@ -95,30 +95,34 @@ SDL_Point Grid::get_grid_offset() const {
     return gridOffset;
 }
 
+/* TODO: Perhaps Grid::update should take a list of players
+ * and enemies with their respective actions for a given
+ * frame, and internally resolve the game logic. Currently,
+ * Grid::update assumes the player is the only entity in the game. */
 int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
+    /* If position is same, do nothing */
+    if (_currPos.x == _prevPos.x && _currPos.y == _prevPos.y) {
+        return 0;
+    }
+
+    auto currTile = grid.at(_currPos.y).at(_currPos.x);
+    auto prevTile = grid.at(_prevPos.y).at(_prevPos.x);
+
     /* Enemy collision */
-    if (grid.at(_currPos.y).at(_currPos.x) > 1) {
+    if (currTile == Tile::enemy) {
         /* TODO: Refine enemy collisions with player and enemy offsets */
         return -1;
     }
 
     /* Empty tile */
-    if (grid.at(_currPos.y).at(_currPos.x) == 0) {
-        /* Decrement all positive tiles */
-        for (auto& _row : grid) {
-            for (auto& _col : _row) {
-                if (_col > 0) {
-                    --_col;
-                }
-            }
-        }
-
-        grid.at(_currPos.y).at(_currPos.x) = 0;
+    if (currTile == Tile::empty) {
+        currTile = Tile::player;
+        prevTile = Tile::empty;
         return 0;
     }
 
     /* Fruit tile */
-    if (grid.at(_currPos.y).at(_currPos.x) == -1) {
+    if (currTile == Tile::fruit) {
         /* New fruit tile */
         unsigned int _i;
         unsigned char _buf[sizeof(_i)];
@@ -134,10 +138,11 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
         /* Spawn a new fruit on a new empty tile */
         for (int y = 0; y < numRows; ++y) {
             for (int x = 0; x < numCols; ++x) {
-                if (grid.at(y).at(x) == 0 && _i-- == 0) {
+                if (grid.at(y).at(x) == Tile::empty && _i-- == 0) {
                     fruitPos = SDL_Point{x, y};
-                    grid.at(_currPos.y).at(_currPos.x) = 0;
-                    grid.at(fruitPos.y).at(fruitPos.x) = -1;
+                    grid.at(fruitPos.y).at(fruitPos.x) = Tile::fruit;
+                    currTile = Tile::player;
+                    prevTile = Tile::empty;
                     return 1;
                 }
             }
@@ -202,6 +207,6 @@ void Grid::draw_fruit() {
 }
 
 void Grid::reset() {
-    grid.assign(grid.size(), std::vector<int>(numCols));
+    grid.assign(grid.size(), std::vector<Tile>(numCols, Tile::empty));
     fruitPos = init_fruit({11, 5});
 }

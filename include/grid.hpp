@@ -26,6 +26,14 @@ public:
     void reset();
 
 private:
+    enum class Tile {
+        empty,
+        wall,
+        player,
+        enemy,
+        fruit,
+    };
+
     SDL_Point calc_grid_size() const;
     SDL_Point calc_scene_size() const;
     SDL_Point calc_scene_offset() const;
@@ -41,7 +49,7 @@ private:
     SDL_Point sceneSize;
     SDL_Point sceneOffset;
     SDL_Point gridOffset;
-    std::vector<std::vector<int>> grid;
+    std::vector<std::vector<Tile>> grid;
     std::vector<SDL_Rect> wallRects;
     SDL_Point fruitPos;
 };
