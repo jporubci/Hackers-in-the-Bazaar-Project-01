@@ -37,16 +37,16 @@ SDL_Point Player::get_next_position() const {
 
     switch (direction) {
         case Direction::up:
-            --nextPosition.y;
+            nextPosition.y = std::max(0, nextPosition.y - 1);
             break;
         case Direction::down:
-            ++nextPosition.y;
+            nextPosition.y = std::min(numRows - 1, nextPosition.y + 1);
             break;
         case Direction::left:
-            --nextPosition.x;
+            nextPosition.x = std::max(0, nextPosition.x - 1);
             break;
         case Direction::right:
-            ++nextPosition.x;
+            nextPosition.x = std::min(numCols - 1, nextPosition.x + 1);
             break;
         default:
             break;
@@ -62,40 +62,6 @@ bool Player::check_collision() {
         tileSize,
         tileSize
     };
-
-    /* Check walls and include offset */
-    switch (direction) {
-        case Direction::up:
-            if (position.y <= 0) {
-                return true;
-            }
-            playerRect.y -= static_cast<int>(offset);
-            break;
-            
-        case Direction::down:
-            if (position.y >= numRows - 1) {
-                return true;
-            }
-            playerRect.y += static_cast<int>(offset);
-            break;
-            
-        case Direction::left:
-            if (position.x <= 0) {
-                return true;
-            }
-            playerRect.x -= static_cast<int>(offset);
-            break;
-            
-        case Direction::right:
-            if (position.x >= numCols - 1) {
-                return true;
-            }
-            playerRect.x += static_cast<int>(offset);
-            break;
-            
-        default:
-            break;
-    }
 
     /* TODO: Check collision with enemies */
 
@@ -226,23 +192,56 @@ void Player::move() {
     offset += speed / (1e9 / _interval);
     prevTime = _currTime;
 
+    switch (direction) {
+        case Direction::up:
+            position.y -= static_cast<int>(offset) / tileSize;
+            if (position.y <= 0) {
+                position.y = 0;
+                offset = 0;
+                if (!turnBuffer.empty()) {
+                    direction = turnBuffer.front();
+                    turnBuffer.pop();
+                }
+            }
+            break;
+        case Direction::down:
+            position.y += static_cast<int>(offset) / tileSize;
+            if (position.y >= numRows - 1) {
+                position.y = numRows - 1;
+                offset = 0;
+                if (!turnBuffer.empty()) {
+                    direction = turnBuffer.front();
+                    turnBuffer.pop();
+                }
+            }
+            break;
+        case Direction::left:
+            position.x -= static_cast<int>(offset) / tileSize;
+            if (position.x <= 0) {
+                position.x = 0;
+                offset = 0;
+                if (!turnBuffer.empty()) {
+                    direction = turnBuffer.front();
+                    turnBuffer.pop();
+                }
+            }
+            break;
+        case Direction::right:
+            position.x += static_cast<int>(offset) / tileSize;
+            if (position.x >= numCols - 1) {
+                position.x = numCols - 1;
+                offset = 0;
+                if (!turnBuffer.empty()) {
+                    direction = turnBuffer.front();
+                    turnBuffer.pop();
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
     if (offset >= tileSize) {
-        switch (direction) {
-            case Direction::up:
-                position.y -= static_cast<int>(offset) / tileSize;
-                break;
-            case Direction::down:
-                position.y += static_cast<int>(offset) / tileSize;
-                break;
-            case Direction::left:
-                position.x -= static_cast<int>(offset) / tileSize;
-                break;
-            case Direction::right:
-                position.x += static_cast<int>(offset) / tileSize;
-                break;
-            default:
-                break;
-        }
         if (!turnBuffer.empty()) {
             direction = turnBuffer.front();
             turnBuffer.pop();

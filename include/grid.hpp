@@ -2,6 +2,7 @@
 #define GRID_HPP
 
 #include <SDL.h>
+#include "tile.hpp"
 #include <vector>
 
 class Grid {
@@ -22,18 +23,10 @@ public:
     int update(SDL_Point _prevPos, SDL_Point _currPos);
     void draw_grid();
     void draw_walls();
-    void draw_fruit();
+    void draw_tile(const SDL_Point& tilePosition, const Tile& tileType);
     void reset();
 
 private:
-    enum class Tile {
-        empty,
-        wall,
-        player,
-        enemy,
-        fruit,
-    };
-
     SDL_Point calc_grid_size() const;
     SDL_Point calc_scene_size() const;
     SDL_Point calc_scene_offset() const;
