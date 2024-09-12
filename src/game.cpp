@@ -70,10 +70,10 @@ void Game::step() {
         case State::playGame:
             _prevPos = player.get_next_position();
             player.move();
-            if (player.check_collision()) {
+            /*if (player.check_collision()) {
                 state = State::gameOver;
                 break;
-            }
+            }*/
             _currPos = player.get_next_position();
             _status = grid.update(_prevPos, _currPos);
             if (_status < 0) {
@@ -100,7 +100,7 @@ void Game::step() {
 
 void Game::draw() {
     grid.draw_grid();
-    grid.draw_fruit();
+    //grid.draw_fruit();
     player.draw();
-    grid.draw_walls();
+    //grid.draw_walls();
 }

@@ -105,8 +105,8 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
         return 0;
     }
 
-    auto currTile = grid.at(_currPos.y).at(_currPos.x);
-    auto prevTile = grid.at(_prevPos.y).at(_prevPos.x);
+    auto& currTile = grid.at(_currPos.y).at(_currPos.x);
+    auto& prevTile = grid.at(_prevPos.y).at(_prevPos.x);
 
     /* Enemy collision */
     if (currTile == Tile::enemy) {
@@ -123,6 +123,8 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
 
     /* Fruit tile */
     if (currTile == Tile::fruit) {
+        currTile = Tile::player;
+
         /* New fruit tile */
         unsigned int _i;
         unsigned char _buf[sizeof(_i)];
@@ -141,7 +143,6 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
                 if (grid.at(y).at(x) == Tile::empty && _i-- == 0) {
                     fruitPos = SDL_Point{x, y};
                     grid.at(fruitPos.y).at(fruitPos.x) = Tile::fruit;
-                    currTile = Tile::player;
                     prevTile = Tile::empty;
                     return 1;
                 }
@@ -178,6 +179,12 @@ void Grid::draw_grid() {
             gridOffset.y + gridSize.y
         );
     }
+
+    for (int y = 0; y < numRows; ++y) {
+        for (int x = 0; x < numCols; ++x) {
+            draw_tile({x, y}, grid.at(y).at(x));
+        }
+    }
 }
 
 void Grid::draw_walls() {
@@ -185,25 +192,37 @@ void Grid::draw_walls() {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_SetRenderDrawColor() failed: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
-    
+
     for (const auto& wallRect : wallRects) {
         SDL_RenderFillRect(renderer, &wallRect);
     }
 }
 
-void Grid::draw_fruit() {
-    if (SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE) < 0) {
+void Grid::draw_tile(const SDL_Point& tilePosition, const Tile& tileType) {
+    int r, g, b;
+    switch (tileType) {
+        case Tile::fruit:
+            r = 255; g =   0; b =   0;
+            break;
+        case Tile::wall:
+            r =   0; g =   0; b = 255;
+            break;
+        default:
+            return;
+    }
+
+    if (SDL_SetRenderDrawColor(renderer, r, g, b, SDL_ALPHA_OPAQUE) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_SetRenderDrawColor() failed: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
-    
-    SDL_Rect _fruitRect = {
-        gridOffset.x + fruitPos.x * tileSize,
-        gridOffset.y + fruitPos.y * tileSize,
+
+    SDL_Rect _rect = {
+        gridOffset.x + tilePosition.x * tileSize,
+        gridOffset.y + tilePosition.y * tileSize,
         tileSize,
         tileSize
     };
-    SDL_RenderFillRect(renderer, &_fruitRect);
+    SDL_RenderFillRect(renderer, &_rect);
 }
 
 void Grid::reset() {
