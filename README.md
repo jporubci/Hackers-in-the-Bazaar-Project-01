@@ -20,16 +20,19 @@ The easiest way to compile this project on macOS is with [Homebrew] and [CMake].
    ./bin/main
    ```
 
-You control the yellow square. Use the W, A, S, and D keys to go up, left, down, and right, respectively. It is game over if you run into the walls. Red squares are fruit. You can eat fruit by moving over them. An FPS counter in the top-right corner tells you how the game is performing on your system; the higher the number, the better.
+You control the yellow square. Use the W, A, S, and D keys to go up, left, down, and right, respectively. Red squares are fruit. You can eat fruit by moving over them. An FPS counter in the top-right corner tells you how the game is performing on your system; the higher the number, the better.
 
-## Todo
-- Fix movement so that it is possible to stand still.
-- Add enemies that follow the player.
-- Make the fruit do something.
-- Make the map more like a maze than an empty grid.
-- Prevent the player from moving through a wall instead of ending the game when a player moves through a wall.
-- Add some HUD elements.
-- Add bombs!
+## Todo - Jozef
+1. Add bombs!
+1. Make walls block movement (border walls currently do this; the goal is for wall tiles to block player movement as well)
+1. Make the map more like a maze than an empty grid
+1. Add enemies
+
+## Todo - Matt
+1. Make a HUD
+1. Create a goal for the player to strive for, whether it’s with points, levels, survival time, or a combination of the aforementioned systems
+1. Add sound
+1. Make the fruit do something
 
 [CMake]: https://cmake.org/
 [Homebrew]: https://brew.sh/

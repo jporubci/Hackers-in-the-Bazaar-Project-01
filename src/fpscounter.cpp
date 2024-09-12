@@ -10,7 +10,7 @@ FPSCounter::FPSCounter(
     window(_window),
     renderer(_renderer),
     textColor({255, 255, 255, SDL_ALPHA_OPAQUE}),
-    font(init_font("/System/Library/Fonts/Monaco.ttf", 36)),
+    font(init_font("/System/Library/Fonts/Monaco.ttf", 14)),
     textureRect(set_textureRect("0")),
     prevTime(),
     prevTimeValid(false),
