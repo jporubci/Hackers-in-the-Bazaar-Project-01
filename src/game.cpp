@@ -30,6 +30,10 @@ Game::Game(
         SDL_Point({2, 5}),
         5.0 * tileSize,
         Direction::right
+    ),
+    hud(
+        window,
+        renderer
     )
 {}
 
@@ -103,4 +107,5 @@ void Game::draw() {
     //grid.draw_fruit();
     player.draw();
     //grid.draw_walls();
+    hud.draw();
 }
