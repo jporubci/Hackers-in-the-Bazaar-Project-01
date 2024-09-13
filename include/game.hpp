@@ -4,6 +4,7 @@
 #include "keyboard.hpp"
 #include "grid.hpp"
 #include "player.hpp"
+#include "hud.hpp"
 #include <SDL.h>
 
 enum class State;
@@ -37,6 +38,7 @@ private:
     int tileSize;
     Grid grid;
     Player player;
+    Hud hud;
 };
 
 #endif
