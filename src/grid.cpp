@@ -18,9 +18,9 @@ Grid::Grid(
     numCols(_numCols),
     tileSize(_tileSize),
     gridSize(calc_grid_size()), sceneSize(calc_scene_size()), sceneOffset(calc_scene_offset()), gridOffset(calc_grid_offset()),
-    grid(numRows, std::vector<Tile>(numCols, Tile::empty)),
+    grid(init_grid()),
     wallRects(calc_wall_rects()),
-    fruitPos(init_fruit({11, 5}))
+    fruitPos(init_fruit())
 {}
 
 SDL_Point Grid::calc_grid_size() const {
@@ -74,9 +74,52 @@ std::vector<SDL_Rect> Grid::calc_wall_rects() const {
    };
 }
 
-SDL_Point Grid::init_fruit(SDL_Point _fruitPos) {
-    grid.at(_fruitPos.y).at(_fruitPos.x) = Tile::fruit;
-    return _fruitPos;
+std::vector<std::vector<Tile>> Grid::init_grid() {
+    return {
+        { Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::player, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::wall, Tile::empty, Tile::wall, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::empty, Tile::wall },
+        { Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall, Tile::wall }
+    };
+}
+
+SDL_Point Grid::init_fruit() {
+    /* New fruit tile */
+    unsigned int _i;
+    unsigned char _buf[sizeof(_i)];
+    if (RAND_bytes(_buf, sizeof(_buf)) != 1) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "RAND_bytes() failed: %s", ERR_error_string(ERR_get_error(), nullptr));
+        exit(EXIT_FAILURE);
+    }
+
+    std::memcpy(&_i, _buf, sizeof(_i));
+
+    _i = static_cast<unsigned int>(static_cast<double>(_i) / UINT_MAX * (numRows * numCols - 2));
+
+    /* Spawn a new fruit on a new empty tile */
+    for (int y = 0; y < numRows; ++y) {
+        for (int x = 0; x < numCols; ++x) {
+            if (grid.at(y).at(x) == Tile::empty && _i-- == 0) {
+                fruitPos = SDL_Point{x, y};
+                grid.at(fruitPos.y).at(fruitPos.x) = Tile::fruit;
+                return fruitPos;
+            }
+        }
+    }
+
+    return fruitPos;
 }
 
 SDL_Point Grid::get_grid_size() const {
@@ -100,13 +143,18 @@ SDL_Point Grid::get_grid_offset() const {
  * frame, and internally resolve the game logic. Currently,
  * Grid::update assumes the player is the only entity in the game. */
 int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
+    auto& currTile = grid.at(_currPos.y).at(_currPos.x);
+    auto& prevTile = grid.at(_prevPos.y).at(_prevPos.x);
+    
     /* If position is same, do nothing */
     if (_currPos.x == _prevPos.x && _currPos.y == _prevPos.y) {
         return 0;
     }
 
-    auto& currTile = grid.at(_currPos.y).at(_currPos.x);
-    auto& prevTile = grid.at(_prevPos.y).at(_prevPos.x);
+    /* Wall collision */
+    if (currTile == Tile::wall) {
+        return 1;
+    }
 
     /* Enemy collision */
     if (currTile == Tile::enemy) {
@@ -135,7 +183,7 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
 
         std::memcpy(&_i, _buf, sizeof(_i));
 
-        _i = static_cast<unsigned int>(static_cast<double>(_i) / UINT_MAX * (numRows * numCols - 2));
+        _i = static_cast<unsigned int>(static_cast<double>(_i) / UINT_MAX * (256 - 154 - 2));
 
         /* Spawn a new fruit on a new empty tile */
         for (int y = 0; y < numRows; ++y) {
@@ -144,7 +192,7 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
                     fruitPos = SDL_Point{x, y};
                     grid.at(fruitPos.y).at(fruitPos.x) = Tile::fruit;
                     prevTile = Tile::empty;
-                    return 1;
+                    return 0;
                 }
             }
         }
@@ -153,7 +201,7 @@ int Grid::update(SDL_Point _prevPos, SDL_Point _currPos) {
         return -1;
     }
 
-    return -1;
+    return 0;
 }
 
 void Grid::draw_grid() {
@@ -226,6 +274,6 @@ void Grid::draw_tile(const SDL_Point& tilePosition, const Tile& tileType) {
 }
 
 void Grid::reset() {
-    grid.assign(grid.size(), std::vector<Tile>(numCols, Tile::empty));
-    fruitPos = init_fruit({11, 5});
+    grid = init_grid();
+    fruitPos = init_fruit();
 }

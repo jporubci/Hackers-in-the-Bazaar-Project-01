@@ -15,7 +15,8 @@ public:
         int _tileSize
     );
 
-    SDL_Point init_fruit(SDL_Point _fruitPos);
+    std::vector<std::vector<Tile>> init_grid();
+    SDL_Point init_fruit();
     SDL_Point get_grid_size() const;
     SDL_Point get_scene_size() const;
     SDL_Point get_scene_offset() const;
@@ -25,6 +26,8 @@ public:
     void draw_walls();
     void draw_tile(const SDL_Point& tilePosition, const Tile& tileType);
     void reset();
+    
+    std::vector<std::vector<Tile>> grid;
 
 private:
     SDL_Point calc_grid_size() const;
@@ -42,7 +45,6 @@ private:
     SDL_Point sceneSize;
     SDL_Point sceneOffset;
     SDL_Point gridOffset;
-    std::vector<std::vector<Tile>> grid;
     std::vector<SDL_Rect> wallRects;
     SDL_Point fruitPos;
 };

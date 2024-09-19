@@ -20,23 +20,6 @@ The easiest way to compile this project on macOS is with [Homebrew] and [CMake].
    ./bin/main
    ```
 
-You control the yellow square. Use the W, A, S, and D keys to go up, left, down, and right, respectively. Red squares are fruit. You can eat fruit by moving over them. An FPS counter in the top-right corner tells you how the game is performing on your system; the higher the number, the better.
+You control the yellow square. Use the W, A, S, and D keys to go up, left, down, and right, respectively. Red squares are fruit. You can eat fruit by moving over them. They don't do anything... sadly. But we got bombs! Press the spacebar to throw a bomb that explodes when it hits a wall. An FPS counter in the top-right corner tells you how the game is performing on your system. Framerate is capped at 60 fps for visual fidelity.
 
-## Todo - Jozef
-1. Add bombs!
-1. Make walls block movement (border walls currently do this; the goal is for wall tiles to block player movement as well)
-1. Make the map more like a maze than an empty grid
-1. Add enemies
-
-## Todo - Matt
-1. Make a HUD
-1. Create a goal for the player to strive for, whether it’s with points, levels, survival time, or a combination of the aforementioned systems
-1. Add sound
-1. Make the fruit do something
-
-[CMake]: https://cmake.org/
-[Homebrew]: https://brew.sh/
-[Install Homebrew]: https://docs.brew.sh/Installation
-[SDL2]: https://github.com/libsdl-org/SDL/tree/SDL2
-[SDL2_ttf]: https://github.com/libsdl-org/SDL_ttf/tree/SDL2
-[OpenSSL]: https://github.com/openssl/openssl
+Reach the highest level you can!

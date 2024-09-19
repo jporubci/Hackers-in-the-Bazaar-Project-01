@@ -1,6 +1,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include "enemy.hpp"
 #include "keyboard.hpp"
 #include "grid.hpp"
 #include "player.hpp"
@@ -33,12 +34,13 @@ private:
     SDL_Renderer* renderer;
     State state;
     Keyboard keyboard;
-    const int numRows;
-    const int numCols;
+    int numRows;
+    int numCols;
     int tileSize;
     Grid grid;
     Player player;
-    Hud hud;
+    std::vector<Enemy> enemies;
+    HUD hud;
 };
 
 #endif

@@ -3,12 +3,12 @@
 
 Scene::Scene() :
     windowName("Pac-Man with Bombs!"),
-    vsyncOn(false),
+    vsyncOn(true),
     window(init_window()),
     renderer(init_renderer()),
     prevTime(),
     prevTimeValid(false),
-    maxRefreshRate(0.0),
+    maxRefreshRate(60.0),
     fpsCounter(window, renderer),
     game(window, renderer)
 {}

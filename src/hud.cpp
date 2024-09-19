@@ -3,7 +3,7 @@
 #include <string>
 #include <cstdlib>
 
-Hud::Hud(
+HUD::HUD(
     SDL_Window* _window,
     SDL_Renderer* _renderer
 ) :
@@ -11,10 +11,11 @@ Hud::Hud(
     renderer(_renderer),
     textColor({255, 255, 255, SDL_ALPHA_OPAQUE}),
     font(init_font("/System/Library/Fonts/Monaco.ttf", 14)),
-    textureRect(set_textureRect("Level: "))
+    textureRect(set_textureRect("Level: ")),
+    level(1)
 {}
 
-TTF_Font* Hud::init_font(const char* _fontPath, int _fontPtSize) {
+TTF_Font* HUD::init_font(const char* _fontPath, int _fontPtSize) {
     if (TTF_Init() == -1) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "TTF_Init() failed: %s", TTF_GetError());
         exit(EXIT_FAILURE);
@@ -29,8 +30,8 @@ TTF_Font* Hud::init_font(const char* _fontPath, int _fontPtSize) {
     return _font;
 }
 
-Hud::TextureRect Hud::set_textureRect(const char* _fpsText) {
-    SDL_Surface* _surface = TTF_RenderUTF8_Solid(font, _fpsText, textColor);
+HUD::TextureRect HUD::set_textureRect(const char* _levelText) {
+    SDL_Surface* _surface = TTF_RenderUTF8_Solid(font, _levelText, textColor);
     if (_surface == nullptr) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "TTF_RenderUTF8_Solid() failed: %s", TTF_GetError());
         exit(EXIT_FAILURE);
@@ -54,23 +55,24 @@ Hud::TextureRect Hud::set_textureRect(const char* _fpsText) {
     return TextureRect{_texture, _rect};
 }
 
-void Hud::draw() {
-    // track number of lives, points
-
-    ++frameCount;
-    
+void HUD::draw() {
     if (SDL_RenderCopy(renderer, textureRect.texture, nullptr, &textureRect.rect) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_RenderCopy() failed: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
-    
+
+    std::string _levelString = "Level: " + std::to_string(level);
+    const char* _levelText = _levelString.c_str();
+
     SDL_DestroyTexture(textureRect.texture);
-    textureRect = set_textureRect("Level: ");
-    
-    frameCount = 0;
+    textureRect = set_textureRect(_levelText);
 }
 
-void Hud::shutdown() {
+void HUD::increment_level() {
+    ++level;
+}
+
+void HUD::shutdown() {
     if (font != nullptr) {
         TTF_CloseFont(font);
     }

@@ -32,6 +32,10 @@ Player::Player(
     prevTimeValid(false)
 {}
 
+SDL_Point Player::get_position() const {
+    return position;
+}
+
 SDL_Point Player::get_next_position() const {
     SDL_Point nextPosition(position);
 
@@ -134,18 +138,23 @@ void Player::set_direction(const Keyboard _keyboard, SDL_Keycode _key) {
     }
 }
 
-void Player::move() {
+void Player::collided_with_wall(const bool turned, const SDL_Point prevPos) {
+    position = prevPos;
+    offset = tileSize - 0.0001;
+}
+
+int Player::move() {
     auto _currTime = highest_resolution_steady_clock::now();
     if (!prevTimeValid) {
         prevTime = _currTime;
         prevTimeValid = true;
-        return;
+        return -1;
     }
 
     /* Check if any time has passed */
     auto _interval = std::chrono::duration_cast<std::chrono::nanoseconds>(_currTime - prevTime).count();
     if (_interval <= 0) {
-        return;
+        return -1;
     }
 
     /* Check if we are reversing directions */
@@ -241,13 +250,18 @@ void Player::move() {
             break;
     }
 
+    int turned = 0;
     if (offset >= tileSize) {
         if (!turnBuffer.empty()) {
-            direction = turnBuffer.front();
+            Direction newDirection = turnBuffer.front();
+            turned = direction != newDirection;
+            direction = newDirection;
             turnBuffer.pop();
         }
+
         offset = fmod(offset, tileSize);
     }
+    return turned;
 }
 
 void Player::draw() {
@@ -256,6 +270,35 @@ void Player::draw() {
         exit(EXIT_FAILURE);
     }
 
+    SDL_Rect playerRect = get_rect();
+
+    SDL_RenderFillRect(renderer, &playerRect);
+
+    if (SDL_SetRenderDrawColor(renderer, 255, 215, 0, SDL_ALPHA_OPAQUE) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL_SetRenderDrawColor() failed: %s", SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+
+    for (auto& bomb : bombs) {
+        SDL_Rect bombRect = bomb.get_rect();
+        SDL_RenderFillRect(renderer, &bombRect);
+    }
+}
+
+void Player::reset(SDL_Point _position, double _speed, Direction _direction) {
+    position = _position;
+    speed = _speed;
+    offset = tileSize - 0.01;
+    direction = Direction::right;
+    keyBuffer.clear();
+    while (!turnBuffer.empty()) {
+        turnBuffer.pop();
+    }
+    prevTimeValid = false;
+    bombs.clear();
+}
+
+SDL_Rect Player::get_rect() const {
     SDL_Rect playerRect = {
         gridOffset.x + tileSize * position.x,
         gridOffset.y + tileSize * position.y,
@@ -284,17 +327,5 @@ void Player::draw() {
             break;
     }
 
-    SDL_RenderFillRect(renderer, &playerRect);
-}
-
-void Player::reset(SDL_Point _position, double _speed, Direction _direction) {
-    position = _position;
-    speed = _speed;
-    offset = tileSize - 0.01;
-    direction = Direction::right;
-    keyBuffer.clear();
-    while (!turnBuffer.empty()) {
-        turnBuffer.pop();
-    }
-    prevTimeValid = false;
+    return playerRect;
 }
